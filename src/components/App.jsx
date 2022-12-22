@@ -1,38 +1,13 @@
 import React, { Component } from 'react';
-import { nanoid } from 'nanoid';
 import ContactForm from './ContactForm';
 import Filter from './Filter';
 import ContactList from './ContactList';
+import { nanoid } from 'nanoid';
 
 export class App extends Component {
   state = {
     contacts: [],
     filter: '',
-    name: '',
-    number: '',
-  };
-
-  // Генератор випадкових id
-  nameInputId = nanoid();
-
-  // Метод записує дані із інпута у стейт
-  handleInputChange = event => {
-    const { name, value } = event.currentTarget;
-    this.setState({ [name]: value });
-
-    const normalizedContacts = this.state.contacts;
-    // Якщо таке ім'є вже присутнє то показати повідомлення і стерти дані з інпута
-    if (
-      normalizedContacts.find(
-        contact =>
-          contact.name.toLocaleLowerCase() === value.toLocaleLowerCase()
-      )
-    ) {
-      alert(`${value} is already in contacts`);
-      this.setState({
-        name: '',
-      });
-    }
   };
 
   changeFilter = event => {
@@ -50,63 +25,54 @@ export class App extends Component {
     );
   };
 
-  // Метод виконується при сабміті форми
-  handleSubmit = event => {
-    event.preventDefault();
-    console.log(this.state);
-
-    // Записуємо у пропс значення стейту (передаємо дані у App-компонент)
-    this.addContacts(this.state);
-    this.reset();
-  };
-
-  // Додає дані користувача у масив
-  addContacts = ({ name, number }) => {
-    console.log(name, number);
-    const newContact = {
-      id: this.nameInputId,
-      name,
-      number,
-    };
-
-    this.setState(prevState => ({
-      contacts: [newContact, ...prevState.contacts],
-    }));
-  };
-
   deleteContact = contactId => {
     this.setState(prevState => ({
       contacts: prevState.contacts.filter(contact => contact.id !== contactId),
     }));
   };
 
-  // Очистка інпутів (через очистку стейту)
-  reset = () => {
-    this.setState({
-      name: '',
-      number: '',
-    });
+  // Додає дані користувача у масив
+  addContacts = ({ name, number }) => {
+    console.log(name, number);
+    const newContact = {
+      id: nanoid(),
+      name,
+      number,
+    };
+
+    const { contacts } = this.state;
+    if (
+      contacts.find(
+        contact => contact.name.toLowerCase() === name.toLowerCase()
+      )
+    ) {
+      alert(`${name} is already in contacts`);
+      return;
+    }
+    this.setState(prevState => ({
+      contacts: [newContact, ...prevState.contacts],
+    }));
   };
 
   render() {
-    const { name, number, filter } = this.state;
+    const { filter, contacts } = this.state;
     const filteredContacts = this.getVisibleContacts();
     return (
       <div>
         <h1>Phonebook</h1>
-        <ContactForm
-          name={name}
-          number={number}
-          handleSubmit={this.handleSubmit}
-          handleInputChange={this.handleInputChange}
-        />
+        <ContactForm addContacts={this.addContacts} />
 
         <h2>Contacts</h2>
-        <Filter value={filter} changeFilter={this.changeFilter}></Filter>
-        <ContactList
-          filteredContacts={filteredContacts}
-          deleteContact={this.deleteContact}
-        />
+
+        {contacts.length > 0 && (
+          <>
+            <Filter value={filter} changeFilter={this.changeFilter}></Filter>
+            <ContactList
+              filteredContacts={filteredContacts}
+              deleteContact={this.deleteContact}
+            />
+          </>
+        )}
       </div>
     );
   }
