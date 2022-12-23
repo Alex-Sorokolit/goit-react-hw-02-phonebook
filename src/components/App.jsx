@@ -34,12 +34,7 @@ export class App extends Component {
   // Додає дані користувача у масив
   addContacts = ({ name, number }) => {
     console.log(name, number);
-    const newContact = {
-      id: nanoid(),
-      name,
-      number,
-    };
-
+    // Перевірка чи існує контакт із таким ім'ям у масиві
     const { contacts } = this.state;
     if (
       contacts.find(
@@ -49,6 +44,13 @@ export class App extends Component {
       alert(`${name} is already in contacts`);
       return;
     }
+    // Запис даних із інпутів у масив
+    const newContact = {
+      id: nanoid(),
+      name,
+      number,
+    };
+
     this.setState(prevState => ({
       contacts: [newContact, ...prevState.contacts],
     }));
